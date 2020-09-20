@@ -1,19 +1,103 @@
+const status = require('http-status-codes');
 const User = require('../models/user.js');
 
 module.exports.getAllUsers = (req, res) => {
-  User.find().then((users) => res.send({ data: users }))
-    .catch((err) => res.status(500).send({ message: err })); // TODO more meaningful error message
+  User.find()
+    .then((users) => res.send({ data: users }))
+    .catch(() => res.status(status.INTERNAL_SERVER_ERROR)
+      .send({ message: 'Internal Server Error' }));
 };
 
 module.exports.getUser = (req, res) => {
   const userId = req.params.id;
-  User.findById(userId).then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err }));
+  User.findById(userId)
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      } else {
+        res.status(status.NOT_FOUND)
+          .send({ message: 'User does not exist' });
+      }
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(status.BAD_REQUEST)
+          .send({ message: 'Not a valid user id' });
+      } else {
+        res.status(status.INTERNAL_SERVER_ERROR)
+          .send({ message: 'Internal Server Error' });
+      }
+    });
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+  User.create({
+    name,
+    about,
+    avatar,
+  })
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(status.BAD_REQUEST)
+          .send({ message: 'Not a valid user object' });
+      } else {
+        res.status(status.INTERNAL_SERVER_ERROR)
+          .send({ message: 'Internal Server Error' });
+      }
+    });
+};
+
+module.exports.updateUser = (req, res) => {
+  const { name, about } = req.body;
+
+  User.findByIdAndUpdate(
+    req.user._id,
+    {
+      name,
+      about,
+    },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    },
+  )
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(status.BAD_REQUEST)
+          .send({ message: 'Not a valid user object' });
+      } else {
+        res.status(status.INTERNAL_SERVER_ERROR)
+          .send({ message: 'Internal Server Error' });
+      }
+    });
+};
+
+module.exports.updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    req.user._id,
+    {
+      avatar,
+    },
+    {
+      new: true,
+      runValidators: true,
+      upsert: true,
+    },
+  )
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(status.BAD_REQUEST)
+          .send({ message: 'Not a valid user object' });
+      } else {
+        res.status(status.INTERNAL_SERVER_ERROR)
+          .send({ message: 'Internal Server Error' });
+      }
+    });
 };

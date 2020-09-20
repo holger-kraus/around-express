@@ -13,4 +13,12 @@ router.delete('/:id', (req, res) => {
   cards.deleteCard(req, res);
 });
 
+router.put('/:cardId/likes', (req, res) => {
+  cards.likeCard(req, res);
+});
+
+router.delete('/:cardId/likes', (req, res) => {
+  cards.dislikeCard(req, res);
+});
+
 module.exports = router;

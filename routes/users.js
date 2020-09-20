@@ -13,4 +13,12 @@ router.get('/:id', (req, res) => {
   users.getUser(req, res);
 });
 
+router.patch('/me', (req, res) => {
+  users.updateUser(req, res);
+});
+
+router.patch('/me/avatar', (req, res) => {
+  users.updateAvatar(req, res);
+});
+
 module.exports = router;
