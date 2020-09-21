@@ -15,7 +15,10 @@ module.exports.createCard = (req, res) => {
   Card.create({
     name,
     link,
-    owner: req.user._id,
+    owner: req.user._id, // comment for the reviewer: please create a user in the database
+    // and assign the id of the created user to req.user in app.js, just replace the id that is
+    // already there, then then owner won't be null
+    // anymore. This was the precondition to make in work from the project brief.
   })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
